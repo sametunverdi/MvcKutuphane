@@ -127,6 +127,12 @@
     <Reference Include="X.PagedList, Version=9.1.2.0, Culture=neutral, PublicKeyToken=525ccaa9023f010c, processorArchitecture=MSIL">
       <HintPath>..\packages\X.PagedList.9.1.2\lib\netstandard2.0\X.PagedList.dll</HintPath>
     </Reference>
+    <Reference Include="zxing, Version=1.0.4727.18517, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.2.1.1\lib\net20\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.16.9.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZXing.Net.0.16.9\lib\net47\zxing.presentation.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">

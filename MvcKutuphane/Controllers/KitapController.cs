@@ -14,18 +14,36 @@ namespace MvcKutuphane.Controllers
         public ActionResult Index(string p)
         {
             var kitaplar = from k in db.TBLKITAP select k;
-            if (!string.IsNullOrEmpty(p)) 
+            if (!string.IsNullOrEmpty(p))
             {
                 kitaplar = kitaplar.Where(m => m.AD.Contains(p));
             }
             //var kitaplar = db.TBLKITAP.ToList();
             return View(kitaplar.ToList());
         }
+
+
+        [HttpPost]
+        public ActionResult KitapByBarcode(string barcode)
+        {
+            var kitap = db.TBLKITAP.FirstOrDefault(k => k.BARKOD == barcode);
+            if (kitap != null)
+            {
+                // Kitabı bulduğumuzda, kitap bilgilerini JSON olarak geri döndürün
+                return Json(kitap);
+            }
+            else
+            {
+                // Kitap bulunamazsa uygun bir hata mesajı döndürün
+                return Json(new { error = "Kitap bulunamadı." });
+            }
+        }
+
         [HttpGet]
-        public ActionResult KitapEkle() 
+        public ActionResult KitapEkle()
         {
             List<SelectListItem> deger1 = (from i in db.TBLKATEGORI.ToList()
-                                           select new  SelectListItem
+                                           select new SelectListItem
                                            {
                                                Text = i.AD,
                                                Value = i.ID.ToString()
@@ -42,16 +60,27 @@ namespace MvcKutuphane.Controllers
             return View();
         }
         [HttpPost]
-        public ActionResult KitapEkle(TBLKITAP p) 
+        public ActionResult KitapEkle(TBLKITAP p, string barkod)
         {
+            // Barkod alanını gelen değerle güncelle
+            p.BARKOD = barkod;
+
+            // Seçilen kategori ve yazarın veritabanından ilgili nesnelerini al
             var ktg = db.TBLKATEGORI.Where(k => k.ID == p.TBLKATEGORI.ID).FirstOrDefault();
             var yzr = db.TBLYAZAR.Where(y => y.ID == p.TBLYAZAR.ID).FirstOrDefault();
+
+            // Alınan kategori ve yazar nesnelerini kitap nesnesine ata
             p.TBLKATEGORI = ktg;
             p.TBLYAZAR = yzr;
+
+            // Kitabı veritabanına ekle
             db.TBLKITAP.Add(p);
             db.SaveChanges();
+
+            // Index sayfasına yönlendir
             return RedirectToAction("Index");
         }
+
         public ActionResult KitapSil(int id)
         {
             var kitap = db.TBLKITAP.Find(id);
@@ -79,7 +108,7 @@ namespace MvcKutuphane.Controllers
             ViewBag.dgr2 = deger2;
             return View("KitapGetir", ktp);
         }
-        public ActionResult KitapGuncelle (TBLKITAP p) 
+        public ActionResult KitapGuncelle(TBLKITAP p)
         {
             var kitap = db.TBLKITAP.Find(p.ID);
             kitap.AD = p.AD;

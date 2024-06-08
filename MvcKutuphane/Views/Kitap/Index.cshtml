@@ -4,6 +4,11 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/Layout.cshtml";
 }
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+
+</head>
 
 <h2>Kitap Sayfası</h2>
 
@@ -11,8 +16,14 @@
 {
     <div style="margin-bottom:15px; margin-top:15px;">
         <b>Aranacak Kitap Adını Giriniz:</b> @Html.TextBox("p")
-        <input type="submit" value="Ara"/>
+        <input type="submit" value="Ara" />
     </div>
+    <div class="barcode-scanner">
+        <h2>Barkod Tarayıcı</h2>
+        <div id="interactive" class="viewport" style="width: 250px; height: 250px;"></div>
+        <div id="result" class="mt-2"></div>
+    </div>
+
 }
 
 
@@ -26,6 +37,8 @@
         <th>Basım Yılı</th>
         <th>Yayınevi</th>
         <th>Sayfa</th>
+        <th>Barkod Numarası</th>
+
         <th>Durum</th>
         <th>Sil</th>
         <th>Güncelle</th>
@@ -40,6 +53,8 @@
             <td>@k.BASIMYIL</td>
             <td>@k.YAYINEVI</td>
             <td>@k.SAYFA</td>
+            <td>@k.BARKOD</td>
+
             <td>@k.DURUM</td>
             <th><a href="/Kitap/KitapSil/@k.ID" class="btn btn-danger">Sil</a></th>
             <th><a href="/Kitap/KitapGetir/@k.ID" class="btn btn-success">Güncelle</a></th>
@@ -48,4 +63,62 @@
 </table>
 <a href="/Kitap/KitapEkle" class="btn btn-primary">Yeni Kitap Ekle</a>
 
+
+<script>
+        $(document).ready(function () {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#interactive')    // Or '#yourElement' (optional)
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // Barkod türlerini buraya ekleyin
+                }
+            }, function (err) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                console.log("Initialization finished. Ready to start");
+                
+                Quagga.start();
+                document.querySelector('video').style.width = '100%';
+                document.querySelector('video').style.height = '100%';
+
+            });
+
+            Quagga.onDetected(function (data) {
+                alert("Barkod tespit edildi: " + data.codeResult.code);
+                // Tespit edilen barkodu MVC Controller'a gönderebilirsiniz
+                $.ajax({
+                    url: '@Url.Action("KitapByBarcode", "Kitap")',
+                    type: 'POST',
+                    data: { barcode: data.codeResult.code },
+                    success: function (response) {
+                        console.log(response);
+                        if (response.error) {
+                            $('#result').text(response.error);
+ } else {
+                            $('#result').html(`
+                                <h3>Kitap Bilgileri</h3>
+                                <p><strong>ID:</strong> ${response.ID}</p>
+                                <p><strong>Kitap Adı:</strong> ${response.AD}</p>
+                                <p><strong>Yazar:</strong> ${response.YAZAR}</p>
+                                <p><strong>Kategori:</strong> ${response.KATEGORI}</p>
+                                <p><strong>Basım Yılı:</strong> ${response.BASIMYIL}</p>
+                                <p><strong>Yayınevi:</strong> ${response.YAYINEVI}</p>
+                                <p><strong>Sayfa:</strong> ${response.SAYFA}</p>
+                                <p><strong>Durum:</strong> ${response.DURUM}</p>
+                            `);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(error);
+                        $('#result').text('Barkod bilgisi gönderilemedi.');
+                    }
+                });
+            });
+        });
+</script>
 

@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="DBKUTUPHANEModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="DBKUTUPHANEModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="sysdiagrams">
           <Key>
             <PropertyRef Name="diagram_id" />
@@ -64,6 +64,7 @@
           <Property Name="YAYINEVI" Type="varchar" MaxLength="50" />
           <Property Name="SAYFA" Type="varchar" MaxLength="4" />
           <Property Name="DURUM" Type="bit" />
+          <Property Name="BARKOD" Type="varchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="TBLPERSONEL">
           <Key>
@@ -202,8 +203,7 @@
             <End Role="TBLKITAP" EntitySet="TBLKITAP" />
           </AssociationSet>
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DBKUTUPHANEModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
@@ -275,6 +275,7 @@
           <NavigationProperty Name="TBLHAREKET" Relationship="Self.FK_TBLHAREKET_TBLKITAP" FromRole="TBLKITAP" ToRole="TBLHAREKET" />
           <NavigationProperty Name="TBLKATEGORI" Relationship="Self.FK_TBLKITAP_TBLKATEGORI" FromRole="TBLKITAP" ToRole="TBLKATEGORI" />
           <NavigationProperty Name="TBLYAZAR" Relationship="Self.FK_TBLKITAP_TBLYAZAR" FromRole="TBLKITAP" ToRole="TBLYAZAR" />
+          <Property Name="BARKOD" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="TBLPERSONEL">
           <Key>
@@ -477,6 +478,7 @@
           <EntitySetMapping Name="TBLKITAP">
             <EntityTypeMapping TypeName="DBKUTUPHANEModel.TBLKITAP">
               <MappingFragment StoreEntitySet="TBLKITAP">
+                <ScalarProperty Name="BARKOD" ColumnName="BARKOD" />
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="AD" ColumnName="AD" />
                 <ScalarProperty Name="KATEGORI" ColumnName="KATEGORI" />
