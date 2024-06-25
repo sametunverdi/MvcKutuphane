@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Validation;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using MvcKutuphane.Models.Entity;
+using System.Data.Entity;
 
 namespace MvcKutuphane.Controllers
 {
@@ -26,18 +28,38 @@ namespace MvcKutuphane.Controllers
         [HttpPost]
         public ActionResult KitapByBarcode(string barcode)
         {
-            var kitap = db.TBLKITAP.FirstOrDefault(k => k.BARKOD == barcode);
-            if (kitap != null)
+            try
             {
-                // Kitabı bulduğumuzda, kitap bilgilerini JSON olarak geri döndürün
-                return Json(kitap);
+                var kitap = db.TBLKITAP
+                    .Include(k => k.TBLYAZAR)
+                    .Include(k => k.TBLKATEGORI)
+                    .FirstOrDefault(k => k.BARKOD == barcode);
+
+                if (kitap != null)
+                {
+                    return Json(new
+                    {
+                        ID = kitap.ID,
+                        AD = kitap.AD,
+                        YAZAR = kitap.TBLYAZAR.AD + " " + kitap.TBLYAZAR.SOYAD,
+                        KATEGORI = kitap.TBLKATEGORI.AD,
+                        BASIMYIL = kitap.BASIMYIL,
+                        YAYINEVI = kitap.YAYINEVI,
+                        SAYFA = kitap.SAYFA,
+                        DURUM = kitap.DURUM
+                    });
+                }
+                else
+                {
+                    return Json(new { error = "Kitap bulunamadı." });
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Kitap bulunamazsa uygun bir hata mesajı döndürün
-                return Json(new { error = "Kitap bulunamadı." });
+                return Json(new { error = "Beklenmeyen bir hata oluştu: " + ex.Message });
             }
         }
+
 
         [HttpGet]
         public ActionResult KitapEkle()

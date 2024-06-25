@@ -65,60 +65,67 @@
 
 
 <script>
-        $(document).ready(function () {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#interactive')    // Or '#yourElement' (optional)
-                },
-                decoder: {
-                    readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // Barkod türlerini buraya ekleyin
-                }
-            }, function (err) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                console.log("Initialization finished. Ready to start");
-                
-                Quagga.start();
-                document.querySelector('video').style.width = '100%';
-                document.querySelector('video').style.height = '100%';
+        document.addEventListener('DOMContentLoaded', function () {
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#interactive')    // Or '#yourElement' (optional)
+        },
+        decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader"] // Barkod türlerini buraya ekleyin
+        }
+    }, function (err) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        console.log("Initialization finished. Ready to start");
 
-            });
+        Quagga.start();
+        document.querySelector('video').style.width = '100%';
+        document.querySelector('video').style.height = '100%';
+    });
 
-            Quagga.onDetected(function (data) {
-                alert("Barkod tespit edildi: " + data.codeResult.code);
-                // Tespit edilen barkodu MVC Controller'a gönderebilirsiniz
-                $.ajax({
-                    url: '@Url.Action("KitapByBarcode", "Kitap")',
-                    type: 'POST',
-                    data: { barcode: data.codeResult.code },
-                    success: function (response) {
-                        console.log(response);
-                        if (response.error) {
-                            $('#result').text(response.error);
- } else {
-                            $('#result').html(`
-                                <h3>Kitap Bilgileri</h3>
-                                <p><strong>ID:</strong> ${response.ID}</p>
-                                <p><strong>Kitap Adı:</strong> ${response.AD}</p>
-                                <p><strong>Yazar:</strong> ${response.YAZAR}</p>
-                                <p><strong>Kategori:</strong> ${response.KATEGORI}</p>
-                                <p><strong>Basım Yılı:</strong> ${response.BASIMYIL}</p>
-                                <p><strong>Yayınevi:</strong> ${response.YAYINEVI}</p>
-                                <p><strong>Sayfa:</strong> ${response.SAYFA}</p>
-                                <p><strong>Durum:</strong> ${response.DURUM}</p>
-                            `);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error(error);
-                        $('#result').text('Barkod bilgisi gönderilemedi.');
-                    }
-                });
+    Quagga.onDetected(function (data) {
+        alert("Barkod tespit edildi: " + data.codeResult.code);
+
+        // Fetch API kullanarak POST isteği gönder
+        fetch("/Kitap/KitapByBarcode", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ barcode: data.codeResult.code }) // JSON formatına dönüştürerek gönder
+        })
+            .then(response => {
+                // Sunucudan gelen yanıtı JSON olarak oku
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                if (data.error) {
+                    document.querySelector('#result').textContent = data.error;
+                } else {
+                    document.querySelector('#result').innerHTML = `
+                        <h3>Kitap Bilgileri</h3>
+                        <p><strong>ID:</strong> ${data.ID}</p>
+                        <p><strong>Kitap Adı:</strong> ${data.AD}</p>
+                        <p><strong>Yazar:</strong> ${data.YAZAR}</p>
+                        <p><strong>Kategori:</strong> ${data.KATEGORI}</p>
+                        <p><strong>Basım Yılı:</strong> ${data.BASIMYIL}</p>
+                        <p><strong>Yayınevi:</strong> ${data.YAYINEVI}</p>
+                        <p><strong>Sayfa:</strong> ${data.SAYFA}</p>
+                        <p><strong>Durum:</strong> ${data.DURUM}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.querySelector('#result').textContent = 'Barkod bilgisi gönderilemedi.';
             });
-        });
+    });
+});
+
 </script>
 
